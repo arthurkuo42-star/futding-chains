@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>富鼎分會 第16屆產業服務鏈分組（可編輯版）</title>
+<style>
+/* ══ 工具列 ══ */
+#toolbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: #1A1400;
+  border-bottom: 1.5pt solid #C8971C;
+  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 9999;
+  font-family: "Microsoft JhengHei", sans-serif;
+  flex-wrap: wrap;
+}
+#toolbar .tip {
+  color: #C8971C;
+  font-size: 12px;
+  flex: 1;
+  white-space: nowrap;
+}
+#toolbar button {
+  padding: 5px 13px;
+  border-radius: 5px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-print  { background: linear-gradient(135deg,#B8820A,#E8B420); color: #1A1000; }
+.btn-save   { background: #1E3A1E; color: #80D880; border: 1px solid #40A040 !important; }
+.btn-load   { background: #1E2A3A; color: #80B8E8; border: 1px solid #4080C0 !important; }
+.btn-cloud-save { background: #2A1A3A; color: #C898FF; border: 1px solid #8060C0 !important; }
+.btn-cloud-load { background: #1A1A2E; color: #80C8FF; border: 1px solid #4060A0 !important; }
+.btn-add-chain { background: #1A2A1A; color: #A0E8A0; border: 1px solid #40A040 !important; }
+.btn-add-chain:hover { opacity: 0.85; }
+.btn-print:hover, .btn-save:hover, .btn-load:hover,
+.btn-cloud-save:hover, .btn-cloud-load:hover { opacity: 0.85; }
+.sep { width: 1px; height: 22px; background: #3A2A00; flex-shrink: 0; }
+#load-input { display: none; }
+
+/* 儲存提示 toast */
+#toast {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  background: #1A3A10;
+  color: #80D880;
+  border: 1px solid #40A040;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: "Microsoft JhengHei", sans-serif;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 99999;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; }
+
+@media print {
+  #toolbar, #toast { display: none !important; }
+  body { margin-top: 0 !important; }
+  @page { size: A3 landscape; margin: 6mm; }
+}
+
+/* ══ 主體 ══ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Noto Sans CJK TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+  background: #FDFAF2;
+  color: #2A1F00;
+  margin-top: 46px;
+  padding: 6mm;
+}
+@media print { body { margin-top: 0; padding: 0; } }
+
+/* ══ 頂部橫幅 ══ */
+.top-banner {
+  background: linear-gradient(135deg,#7A5200 0%,#B8820A 25%,#E8B420 50%,#B8820A 75%,#7A5200 100%);
+  border-radius: 6pt;
+  padding: 2mm 4mm;
+  margin-bottom: 2.5mm;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4mm;
+}
+.diamond { color: #FFF8DC; font-size: 13pt; flex-shrink: 0; letter-spacing: 2pt; }
+.main-title { flex: 1; text-align: center; }
+.main-title h1 { font-size: 16pt; font-weight: 700; color: #FFF8DC; letter-spacing: 1.5pt; line-height: 1.2; }
+.main-title .subtitle { font-size: 8pt; color: rgba(255,248,220,0.75); margin-top: 1.5pt; }
+.slogan-box {
+  background: rgba(255,255,255,0.18);
+  border: 1pt solid rgba(255,248,220,0.5);
+  border-radius: 5pt;
+  padding: 2.5mm 5mm;
+  text-align: center;
+  min-width: 88mm;
+  flex-shrink: 0;
+}
+.slogan-line1 { font-size: 13.5pt; font-weight: 700; color: #FFF8DC; letter-spacing: 3pt; line-height: 1.3; }
+.slogan-line2 { font-size: 9.5pt; font-weight: 500; color: rgba(255,248,220,0.85); letter-spacing: 1.5pt; margin-top: 1pt; }
+.gold-rule {
+  height: 0.6pt;
+  background: linear-gradient(90deg,transparent,#C8971C 15%,#FFD700 50%,#C8971C 85%,transparent);
+  margin-bottom: 2.5mm;
+}
+
+/* ══ 卡片格 ══ */
+.grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 2.5mm; align-items: start; }
+.card { border-radius: 6pt; border: 0.8pt solid #DFC878; background: #FFFDF5; overflow: hidden; box-shadow: 0 1pt 5pt rgba(180,130,0,0.1); }
+.card-head { padding: 2.5mm 3.5mm 2mm; border-bottom: 0.5pt solid #E8D090; }
+.card-head-name { font-size: 11.5pt; font-weight: 700; line-height: 1.2; letter-spacing: 0.3pt; }
+.card-head-aud  { font-size: 7pt; margin-top: 1.5pt; line-height: 1.4; }
+.card-body { padding: 2mm 3mm 2.5mm; }
+.group-sep { border: none; border-top: 0.5pt solid #EAD88A; margin: 2pt 0; }
+.group-label { font-size: 6.5pt; font-weight: 700; letter-spacing: 0.8pt; text-transform: uppercase; margin-bottom: 1.5pt; }
+.group-row { display: grid; grid-template-columns: 1fr 0.5pt 1fr; gap: 0 3.5pt; align-items: start; }
+.col-divider { background: #E8D090; align-self: stretch; }
+.member-item  { display: flex; align-items: flex-start; gap: 3pt; margin-bottom: 2.5pt; position: relative; }
+.collab-item  { display: flex; align-items: flex-start; gap: 2.5pt; margin-bottom: 2.5pt; position: relative; }
+.m-dot   { width: 5pt; height: 5pt; border-radius: 50%; flex-shrink: 0; margin-top: 3.5pt; }
+.m-name  { font-size: 13pt; font-weight: 700; line-height: 1.25; }
+.m-role  { font-size: 8pt; line-height: 1.3; }
+.collab-o    { font-size: 7pt; flex-shrink: 0; margin-top: 2pt; line-height: 1; }
+.collab-name { font-size: 10.5pt; font-weight: 700; line-height: 1.32; }
+.collab-section-label { font-size: 6.5pt; font-weight: 700; letter-spacing: 0.8pt; text-transform: uppercase; margin-bottom: 2pt; opacity: 0.5; }
+.footer { text-align: center; padding: 2mm 0 0; font-size: 7.5pt; color: #A08830; letter-spacing: 1.5pt; }
+
+/* ── 可編輯 ── */
+[contenteditable] { outline: none; border-radius: 2px; transition: background 0.12s; }
+[contenteditable]:hover  { background: rgba(200,151,28,0.08); cursor: text; }
+[contenteditable]:focus  { background: rgba(200,151,28,0.15); box-shadow: 0 0 0 1.5px #C8971C; }
+
+/* ── 刪除按鈕 ── */
+.del-btn {
+  display: none;
+  position: absolute;
+  right: -14px; top: 2px;
+  background: #C03030; color: white;
+  border: none; border-radius: 50%;
+  width: 13px; height: 13px;
+  font-size: 8px; cursor: pointer;
+  line-height: 13px; text-align: center;
+  padding: 0; flex-shrink: 0;
+}
+.member-item:hover .del-btn,
+.collab-item:hover .del-btn { display: block; }
+@media print { .del-btn, .add-member-btn, .add-collab-btn { display: none !important; } }
+
+/* ── 新增按鈕 ── */
+.add-member-btn, .add-collab-btn {
+  display: block; width: 100%;
+  background: none;
+  border: 0.5pt dashed #D4A830;
+  border-radius: 3px;
+  color: #C8971C; font-size: 8pt;
+  padding: 1.5pt 4pt; cursor: pointer;
+  margin-top: 2pt; text-align: left; opacity: 0.6;
+}
+.add-member-btn:hover, .add-collab-btn:hover { opacity: 1; background: rgba(200,151,28,0.06); }
+
+/* ══ Accent colours ══ */
+.ac-purple { border-color: #B8A0E0; }
+.ac-purple .card-head { background: linear-gradient(135deg,#F0EBFF,#F5F0FF); }
+.ac-purple .card-head-name { color: #3D2878; } .ac-purple .card-head-aud { color: #7060A8; }
+.ac-purple .m-dot { background: #7060C8; } .ac-purple .m-name { color: #2A1A60; } .ac-purple .m-role { color: #2E1E6A; }
+.ac-purple .group-label { color: #9080B8; } .ac-purple .collab-o { color: #C0B0E0; } .ac-purple .collab-name { color: #A898CC; }
+
+.ac-coral { border-color: #E0A890; }
+.ac-coral .card-head { background: linear-gradient(135deg,#FFF0EA,#FFF5F0); }
+.ac-coral .card-head-name { color: #7A2A10; } .ac-coral .card-head-aud { color: #AA5030; }
+.ac-coral .m-dot { background: #C84820; } .ac-coral .m-name { color: #601808; } .ac-coral .m-role { color: #5A1A00; }
+.ac-coral .group-label { color: #C07050; } .ac-coral .collab-o { color: #E0B8A0; } .ac-coral .collab-name { color: #C89880; }
+
+.ac-amber { border-color: #D4A820; }
+.ac-amber .card-head { background: linear-gradient(135deg,#FFF7DC,#FFFAEC); }
+.ac-amber .card-head-name { color: #5A3800; } .ac-amber .card-head-aud { color: #8A5800; }
+.ac-amber .m-dot { background: #B88A00; } .ac-amber .m-name { color: #3A2000; } .ac-amber .m-role { color: #462C00; }
+.ac-amber .group-label { color: #A07800; } .ac-amber .collab-o { color: #D4B840; } .ac-amber .collab-name { color: #B89820; }
+
+.ac-teal { border-color: #70C0A0; }
+.ac-teal .card-head { background: linear-gradient(135deg,#E8F8F0,#F0FAF5); }
+.ac-teal .card-head-name { color: #085040; } .ac-teal .card-head-aud { color: #207860; }
+.ac-teal .m-dot { background: #108870; } .ac-teal .m-name { color: #043830; } .ac-teal .m-role { color: #053828; }
+.ac-teal .group-label { color: #308870; } .ac-teal .collab-o { color: #90D8B8; } .ac-teal .collab-name { color: #70B898; }
+
+.ac-green { border-color: #88C060; }
+.ac-green .card-head { background: linear-gradient(135deg,#EDF7E0,#F3FAE8); }
+.ac-green .card-head-name { color: #204A08; } .ac-green .card-head-aud { color: #3A6818; }
+.ac-green .m-dot { background: #448820; } .ac-green .m-name { color: #143004; } .ac-green .m-role { color: #1A3808; }
+.ac-green .group-label { color: #508828; } .ac-green .collab-o { color: #AAD878; } .ac-green .collab-name { color: #88B858; }
+
+.ac-pink { border-color: #E098B8; }
+.ac-pink .card-head { background: linear-gradient(135deg,#FFF0F5,#FFF5F8); }
+.ac-pink .card-head-name { color: #6A1840; } .ac-pink .card-head-aud { color: #A03868; }
+.ac-pink .m-dot { background: #C03870; } .ac-pink .m-name { color: #480E28; } .ac-pink .m-role { color: #540E30; }
+.ac-pink .group-label { color: #C06080; } .ac-pink .collab-o { color: #E8B0CC; } .ac-pink .collab-name { color: #CC88A8; }
+
+.ac-gray { border-color: #C0B090; }
+.ac-gray .card-head { background: linear-gradient(135deg,#F5F2E8,#FAF8F0); }
+.ac-gray .card-head-name { color: #302818; } .ac-gray .card-head-aud { color: #685840; }
+.ac-gray .m-dot { background: #806848; } .ac-gray .m-name { color: #201808; } .ac-gray .m-role { color: #2E2010; }
+.ac-gray .group-label { color: #907858; } .ac-gray .collab-o { color: #C8B888; } .ac-gray .collab-name { color: #A89868; }
+
+.ac-blue { border-color: #90B8E0; }
+.ac-blue .card-head { background: linear-gradient(135deg,#EAF3FF,#F0F7FF); }
+.ac-blue .card-head-name { color: #0C3878; } .ac-blue .card-head-aud { color: #2858A8; }
+.ac-blue .m-dot { background: #1858B8; } .ac-blue .m-name { color: #082048; } .ac-blue .m-role { color: #0A2458; }
+.ac-blue .group-label { color: #3870B8; } .ac-blue .collab-o { color: #A8C8E8; } .ac-blue .collab-name { color: #88A8D0; }
+
+/* ══ Modal ══ */
+.modal-overlay {
+  display: none; position: fixed; top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.55); z-index: 99998;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: #FFFDF5; border: 1.5px solid #C8971C; border-radius: 10px;
+  padding: 20px 24px; min-width: 340px; max-width: 480px;
+  font-family: "Microsoft JhengHei", sans-serif;
+}
+.modal-box h3 { font-size: 15px; color: #5A3800; margin-bottom: 14px; }
+.modal-box label { font-size: 12px; color: #6A5000; display: block; margin-bottom: 3px; margin-top: 10px; }
+.modal-box input[type=text], .modal-box select {
+  width: 100%; padding: 6px 9px; border: 1px solid #D4A820; border-radius: 5px;
+  font-size: 13px; background: #FFFDF5; color: #2A1F00; outline: none;
+}
+.modal-box input[type=text]:focus, .modal-box select:focus { border-color: #C8971C; }
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+.modal-actions button { padding: 6px 16px; border-radius: 5px; border: none; font-size: 13px; cursor: pointer; font-weight: 600; }
+.btn-modal-ok  { background: linear-gradient(135deg,#B8820A,#E8B420); color: #1A1000; }
+.btn-modal-cancel { background: #EEE; color: #555; }
+.color-grid { display: grid; grid-template-columns: repeat(8,1fr); gap: 6px; margin-top: 4px; }
+.color-opt { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2.5px solid transparent; transition: border-color .15s; }
+.color-opt.selected { border-color: #333 !important; }
+
+/* ══ 小組管理按鈕 ══ */
+.add-group-btn {
+  display: block; width: 100%; background: none;
+  border: 0.5pt dashed #C8971C; border-radius: 3px;
+  color: #B88A00; font-size: 8pt; padding: 2pt 4pt;
+  cursor: pointer; margin-top: 4pt; text-align: left; opacity: 0.65;
+}
+.add-group-btn:hover { opacity: 1; background: rgba(200,151,28,0.06); }
+.del-group-btn {
+  display: inline-block; background: #C03030; color: white;
+  border: none; border-radius: 3px; font-size: 7pt;
+  padding: 1px 5px; cursor: pointer; margin-left: 5px; vertical-align: middle;
+}
+.del-chain-btn {
+  position: absolute; top: 6px; right: 6px;
+  background: #C03030; color: white; border: none; border-radius: 4px;
+  font-size: 9px; padding: 2px 7px; cursor: pointer; z-index: 10;
+}
+.card { position: relative; }
+@media print {
+  .add-group-btn, .del-group-btn, .del-chain-btn { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- 工具列 -->
+<div id="toolbar">
+  <div class="tip">✏️ 點擊文字即可編輯　｜　➕ 新增服務鏈或小組　｜　❌ hover 任一行或卡片可刪除　｜　編輯後記得儲存</div>
+  <div class="sep"></div>
+  <button class="btn-add-chain" onclick="openAddChainModal()">➕ 新增服務鏈</button>
+  <button class="btn-cloud-save" onclick="cloudSave()">☁️ 儲存到雲端</button>
+  <button class="btn-cloud-load" onclick="cloudLoad()">☁️ 從雲端載入</button>
+  <div class="sep"></div>
+  <button class="btn-save"  onclick="saveBackup()">💾 匯出本機備份</button>
+  <button class="btn-load"  onclick="document.getElementById('load-input').click()">📂 匯入本機備份</button>
+  <input type="file" id="load-input" accept=".json" onchange="loadBackup(event)">
+  <div class="sep"></div>
+  <button class="btn-print" onclick="window.print()">🖨️ 列印 / 儲存 PDF</button>
+</div>
+
+<div id="toast">✅ 備份已儲存！</div>
+
+<!-- 頂部橫幅 -->
+<div class="top-banner">
+  <div class="diamond">◆◇◆</div>
+  <div class="main-title">
+    <h1 id="poster-title" contenteditable="true">BNI 高雄富鼎分會　第16屆產業服務鏈分組</h1>
+    <div id="poster-subtitle" class="subtitle" contenteditable="true">● 現有分會夥伴（深色粗體）　　○ 建議招募合作專業別（淺色，均不與現有會員重疊）</div>
+  </div>
+  <div class="slogan-box">
+    <div id="slogan1" class="slogan-line1" contenteditable="true">富鼎富鼎　又富又鼎</div>
+    <div id="slogan2" class="slogan-line2" contenteditable="true">團隊上百人　引薦破百倍</div>
+  </div>
+  <div class="diamond">◆◇◆</div>
+</div>
+<div class="gold-rule"></div>
+<div class="grid" id="main-grid"></div>
+<div class="gold-rule" style="margin-top:2.5mm;margin-bottom:0"></div>
+<div id="poster-footer" class="footer" contenteditable="true">◆　BNI 高雄富鼎分會　第16屆　產業服務鏈引薦地圖　◆</div>
+
+<script>
+// ══ 預設資料 ══
+const DEFAULT_DATA = {
+  title: "BNI 高雄富鼎分會　第16屆產業服務鏈分組",
+  subtitle: "● 現有分會夥伴（深色粗體）　　○ 建議招募合作專業別（淺色，均不與現有會員重疊）",
+  slogan1: "富鼎富鼎　又富又鼎",
+  slogan2: "團隊上百人　引薦破百倍",
+  footer: "◆　BNI 高雄富鼎分會　第16屆　產業服務鏈引薦地圖　◆",
+  chains: [
+    {ac:"ac-purple", name:"企業服務團隊", aud:"客群：5-30人企業主（想凝聚員工向心力的老闆）",
+     groups:[
+      {label:"企業活動組",
+       members:[["蔡宜倩","旅遊業"],["洪淑萍","活動公關業"],["曾梓淞","活動專業歌手"]],
+       collab:["宴會廳活動場地","企業禮品客製業者","燈光音響設備業者","租車遊覽車業者","企業餐飲外燴業者"]},
+      {label:"員工賦能組",
+       members:[["景國強","人力資源管理業"],["曾坤生","企業AI應用規劃師"],["歐陽仁傑","職涯顧問"]],
+       collab:["企業管理顧問EMBA訓練","企業融資政策貸款顧問","員工健檢業者","EAP員工身心健康方案","政府補助申請顧問"]},
+      {label:"辦公設備組",
+       members:[["賴玉軒","電腦設備業"]],
+       collab:["OA事務機業者","辦公家具業者","企業網路資安設備","印刷名片業者","企業通訊系統業者"]}
+     ]},
+    {ac:"ac-coral", name:"品牌造夢者", aud:"客群：新創＆轉型中的品牌主",
+     groups:[
+      {label:"品牌行銷組",
+       members:[["陳鳳伶","網路行銷業"],["陳璟寬","動態攝影師"],["蔡冠亨","CIS平面設計業"],["蔡孟儒","網紅帶貨業"],["羅裕傑","客製化紙箱紙盒業"]],
+       collab:["Podcast自媒體製作業者","電商平台開店顧問","展覽展場設計業者","文案品牌故事寫手","市場調查研究業者"]},
+      {label:"開店服務組",
+       members:[["郭泓志","律師"],["徐碧檠","命理風水"],["郭峻瑋","商用空間租賃業"]],
+       collab:["加盟顧問連鎖體系規劃師","創業貸款顧問","POS收銀系統業者","廣告招牌業者","倉儲配送服務業者"]}
+     ]},
+    {ac:"ac-amber", name:"連鎖餐飲集團服務鏈", aud:"客群：連鎖餐飲業者",
+     groups:[
+      {label:"食品供應組",
+       members:[["葉力維","茶葉供應商"],["鍾易峻","冷凍水產供應商"],["林鈺婷","香腸供應商"],["黃筑憶","花生芝麻製品業"]],
+       collab:["飲料手搖基底供應商","醬料調味品供應商","食用油供應商","麵粉乾貨供應商","冷凍蔬菜食材供應商"]},
+      {label:"設備組",
+       members:[["張志忠","弱電監控"],["陳哲銘","不鏽鋼餐飲設備"],["王瑋聆","水冷扇"]],
+       collab:["廚房排煙機業者","消防安全設備業者","POS收銀系統業者","商用洗碗機業者","冷凍冷藏設備業者"]},
+      {label:"代工加工組",
+       members:[["田揚駿","調理食品開發製造"],["謝睿宸","冷凍水產加工業"]],
+       collab:["食品檢驗認證顧問","食品機械設備業者","食品原料進口商","食品B2B採購平台","食品電商代營運業者"]}
+     ]},
+    {ac:"ac-pink", name:"生命健康服務團隊", aud:"客群：家中有長輩的百萬年薪族群",
+     groups:[
+      {label:"健康改善組",
+       members:[["李治學","私人健身教練"],["謝獻璋","營養輔助食品"],["馬祚為","傳統整復推拿業"],["施盈好","中醫診所"]],
+       collab:["減重代謝醫學診所","心理諮商師","西醫復健物理治療師","睡眠壓力管理顧問","醫美皮膚科診所"]},
+      {label:"生活環境組",
+       members:[["洪翠瑩","友善空間設計"],["鄭勤","外勞人力仲介"],["廖維昇","居家飲水設備"]],
+       collab:["長照機構日照中心","居家護理到府照護","老人醫療輔具業者","照顧者喘息服務業者","無障礙電梯業者"]},
+      {label:"生命服務組",
+       members:[["廖文平","殯葬服務業"],["沈育銘","花園花籃業"]],
+       collab:["靈骨塔骨灰安置業者","悲傷輔導心理師","遺物整理業者","宗教法事服務業者","數位回憶生命故事製作"]}
+     ]},
+    {ac:"ac-gray", name:"屋主服務團隊", aud:"客群：屋主",
+     groups:[
+      {label:"不動產服務",
+       members:[["蘇柏宇","包租代管業"],["劉明傳","房仲業"],["吳煌欽","日立冷氣經銷業"],["陳玥蓁","地政士"]],
+       collab:["智慧家電全屋智能業者","銀行房貸融資業者","搬家業者","屋頂太陽能業者","建物健檢防水業者"]},
+      {label:"居家修繕",
+       members:[["吳韋漢","家用冷氣裝修業"],["劉祐愷","土木包工"],["李鎮緯","水電工程業"],["劉士豪","居家清潔業"],["鄭裕霖","床墊沙發地毯清潔"]],
+       collab:["窗簾窗飾業者","木工系統家具業者","油漆壁紙業者","地板業者","鋁窗隔音窗業者"]}
+     ]},
+    {ac:"ac-teal", name:"高資產服務團隊", aud:"客群：年收500萬以上的客戶",
+     groups:[
+      {label:"",
+       members:[["許毅帆","會計師"],["黃信華","自行車教練"],["梁喬閔","營養師"],["高懿靜","理財投資保險業"],["馬博泰","精緻食品電商"]],
+       collab:["家族傳承接班輔導顧問","高端私人健檢業者","遊艇租賃豪華包機業者","移民海外身分規劃顧問","高端物業管理業者"]},
+      {label:"汽車組",
+       members:[["張宏煜","產險業"],["王婕恩","國產中古車服務業"]],
+       collab:["進口車豪華車業者","汽車美容鍍膜業者","汽車維修保養廠","汽車配件改裝業者","代步車租賃業者"]}
+     ]},
+    {ac:"ac-blue", name:"菁英教育團隊", aud:"客群：35-50歲，年收200萬以上，國小至高中孩子的家長",
+     groups:[
+      {label:"",
+       members:[["林佳慧","理化化學家教業"],["黃秀如","英文家教"],["吳冠緯","數學家教業"]],
+       collab:["升學／留學顧問","兒童心理諮商師","才藝教室（音樂／美術）","兒童運動培訓","兒童眼科診所"]}
+     ]},
+    {ac:"ac-green", name:"ESG永續規劃產業鏈", aud:"客群：工廠、製造業、工廠倉庫",
+     groups:[
+      {label:"",
+       members:[["陳昱麟","AIOT智慧製造服務業"],["樊靖昀","特登農地工廠顧問業"]],
+       collab:["碳盤查碳足跡認證顧問","太陽能綠能設備業者","ISO/CNS認證輔導顧問","廢棄物廢水處理業者","工業安全衛生訓練機構"]}
+     ]},
+    {ac:"ac-pink", name:"質威生活服務團隊", aud:"客群：女性上班族25-45歲（有寵物、有小孩）",
+     groups:[
+      {label:"",
+       members:[["吳沛倫","女裝服飾業"],["王吟亦","兒童滑步滑板車業"]],
+       collab:["寵物醫院獸醫診所","寵物美容旅館","托嬰保母安親班","美妝保養品業者","兒童才藝教育玩具業者"]}
+     ]},
+    {ac:"ac-amber", name:"品味日常", aud:"客群：25-45歲 中高消費客群",
+     groups:[
+      {label:"",
+       members:[["蔡廷源","咖啡廳業"],["陳韋翰","煙燻滷味業"]],
+       collab:["香氛精油蠟燭品牌業者","精品雜貨選品店業者","紅酒精釀啤酒品飲課程","露營戶外輕活動業者","手作陶藝皮革工作坊"]}
+     ]}
+  ]
+};
+
+// ══ 從 DOM 讀取目前狀態 ══
+function readCurrentData() {
+  const data = {
+    title:    document.getElementById('poster-title').innerText,
+    subtitle: document.getElementById('poster-subtitle').innerText,
+    slogan1:  document.getElementById('slogan1').innerText,
+    slogan2:  document.getElementById('slogan2').innerText,
+    footer:   document.getElementById('poster-footer').innerText,
+    chains: []
+  };
+
+  document.querySelectorAll('#main-grid .card').forEach(card => {
+    const ac = [...card.classList].find(c => c.startsWith('ac-'));
+    const chain = {
+      ac,
+      name: card.querySelector('.card-head-name').innerText,
+      aud:  card.querySelector('.card-head-aud').innerText,
+      groups: []
+    };
+
+    // 找每個 group-row 上方的 group-label
+    const body = card.querySelector('.card-body');
+    const children = [...body.children];
+    let currentLabel = null;
+
+    children.forEach(el => {
+      if (el.classList.contains('group-label')) {
+        currentLabel = el.innerText;
+      } else if (el.classList.contains('group-row')) {
+        const members = [];
+        el.querySelectorAll('.member-item').forEach(row => {
+          const nm   = row.querySelector('.m-name');
+          const role = row.querySelector('.m-role');
+          if (nm) members.push([nm.innerText, role ? role.innerText : '']);
+        });
+        const collab = [];
+        el.querySelectorAll('.collab-name').forEach(c => collab.push(c.innerText));
+        chain.groups.push({ label: currentLabel || '', members, collab });
+        currentLabel = null;
+      }
+    });
+
+    data.chains.push(chain);
+  });
+
+  return data;
+}
+
+// ══ JSONbin.io 設定 ══
+const JSONBIN_API_KEY = '$2a$10$ndmO5rCJp5kV9MdiS9DAq.5k9n1PSTRNxjsT4dbx.NyFt7klXoq6C';
+const JSONBIN_BIN_ID  = '69c36e59aa77b81da9185a96';
+const JSONBIN_URL     = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+
+// ══ 儲存到雲端 ══
+async function cloudSave() {
+  showToast('☁️ 儲存中…');
+  const data = readCurrentData();
+  try {
+    const res = await fetch(JSONBIN_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_API_KEY
+      },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showToast('✅ 已儲存到雲端！所有人開啟網址都會看到最新版本。');
+  } catch(err) {
+    showToast('❌ 雲端儲存失敗：' + err.message);
+  }
+}
+
+// ══ 從雲端載入 ══
+async function cloudLoad() {
+  showToast('☁️ 載入中…');
+  try {
+    const res = await fetch(JSONBIN_URL + '/latest', {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const data = json.record;
+    if (!data.chains) throw new Error('雲端資料格式不符');
+    renderAll(data);
+    showToast('✅ 已從雲端載入最新版本！');
+  } catch(err) {
+    showToast('❌ 雲端載入失敗：' + err.message);
+  }
+}
+
+// ══ 頁面載入時自動從雲端拉取最新資料 ══
+async function autoLoadFromCloud() {
+  try {
+    const res = await fetch(JSONBIN_URL + '/latest', {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    });
+    if (!res.ok) return; // 靜默失敗，使用預設資料
+    const json = await res.json();
+    const data = json.record;
+    if (data && data.chains && data.chains.length > 0) {
+      renderAll(data);
+    }
+  } catch(err) {
+    // 靜默失敗，使用預設資料
+  }
+}
+
+// ══ 備份匯出 ══
+function saveBackup() {
+  const data = readCurrentData();
+  const now  = new Date();
+  const ts   = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `富鼎分會_產業服務鏈備份_${ts}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ 備份已下載！檔名：富鼎分會_產業服務鏈備份_' + ts + '.json');
+}
+
+// ══ 備份匯入 ══
+function loadBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      renderAll(data);
+      showToast('✅ 備份已成功匯入！');
+    } catch(err) {
+      alert('❌ 備份檔格式錯誤，請確認是正確的 .json 備份檔。');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = ''; // 允許重複載入同一檔案
+}
+
+// ══ Toast 提示 ══
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ══ 取得 dot 顏色 ══
+const DOT_COLORS = {
+  'ac-purple':'#7060C8','ac-coral':'#C84820','ac-amber':'#B88A00',
+  'ac-teal':'#108870','ac-green':'#448820','ac-pink':'#C03870',
+  'ac-gray':'#806848','ac-blue':'#1858B8'
+};
+function dotColor(ac) { return DOT_COLORS[ac] || '#B88A00'; }
+
+// ══ 建立會員行 ══
+function makeMemberRow(name, role, dc) {
+  const row = document.createElement('div');
+  row.className = 'member-item';
+  const dot = document.createElement('div');
+  dot.className = 'm-dot';
+  dot.style.background = dc;
+  const txt = document.createElement('div');
+  const n = document.createElement('div');
+  n.className = 'm-name'; n.contentEditable = 'true'; n.textContent = name;
+  const r = document.createElement('div');
+  r.className = 'm-role'; r.contentEditable = 'true'; r.textContent = role;
+  txt.appendChild(n); txt.appendChild(r);
+  const del = document.createElement('button');
+  del.className = 'del-btn'; del.textContent = '×';
+  del.onclick = () => row.remove();
+  row.appendChild(dot); row.appendChild(txt); row.appendChild(del);
+  return row;
+}
+
+// ══ 建立合作行 ══
+function makeCollabRow(text) {
+  const row = document.createElement('div');
+  row.className = 'collab-item';
+  const o = document.createElement('div');
+  o.className = 'collab-o'; o.textContent = '○';
+  const t = document.createElement('div');
+  t.className = 'collab-name'; t.contentEditable = 'true'; t.textContent = text;
+  const del = document.createElement('button');
+  del.className = 'del-btn'; del.textContent = '×';
+  del.onclick = () => row.remove();
+  row.appendChild(o); row.appendChild(t); row.appendChild(del);
+  return row;
+}
+
+// ══ 建立卡片 ══
+function buildCard(chain) {
+  const card = document.createElement('div');
+  card.className = 'card ' + chain.ac;
+  const dc = dotColor(chain.ac);
+
+  // 刪除服務鏈按鈕
+  const delChainBtn = document.createElement('button');
+  delChainBtn.className = 'del-chain-btn';
+  delChainBtn.textContent = '✕ 刪除此服務鏈';
+  delChainBtn.onclick = () => {
+    if (confirm('確定要刪除「' + chain.name + '」整條服務鏈嗎？')) card.remove();
+  };
+  card.appendChild(delChainBtn);
+
+  const head = document.createElement('div');
+  head.className = 'card-head';
+  const nm = document.createElement('div');
+  nm.className = 'card-head-name'; nm.contentEditable = 'true'; nm.textContent = chain.name;
+  const aud = document.createElement('div');
+  aud.className = 'card-head-aud'; aud.contentEditable = 'true'; aud.textContent = chain.aud;
+  head.appendChild(nm); head.appendChild(aud);
+  card.appendChild(head);
+
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  chain.groups.forEach((grp, gi) => {
+    if (gi > 0) {
+      const sep = document.createElement('hr');
+      sep.className = 'group-sep';
+      body.appendChild(sep);
+    }
+    if (grp.label) {
+      const lbl = document.createElement('div');
+      lbl.className = 'group-label'; lbl.contentEditable = 'true'; lbl.textContent = grp.label;
+      body.appendChild(lbl);
+    }
+    const row = document.createElement('div');
+    row.className = 'group-row';
+
+    const left = document.createElement('div');
+    grp.members.forEach(([n,r]) => left.appendChild(makeMemberRow(n, r, dc)));
+    const addM = document.createElement('button');
+    addM.className = 'add-member-btn'; addM.textContent = '＋ 新增會員';
+    addM.onclick = () => {
+      const nr = makeMemberRow('姓名','專業別', dc);
+      left.insertBefore(nr, addM);
+      nr.querySelector('.m-name').focus();
+    };
+    left.appendChild(addM);
+
+    const div = document.createElement('div');
+    div.className = 'col-divider';
+
+    const right = document.createElement('div');
+    const collabLabel = document.createElement('div');
+    collabLabel.className = 'collab-section-label';
+    collabLabel.textContent = '招募專業別';
+    right.appendChild(collabLabel);
+    grp.collab.forEach(c => right.appendChild(makeCollabRow(c)));
+    const addC = document.createElement('button');
+    addC.className = 'add-collab-btn'; addC.textContent = '＋ 新增合作對象';
+    addC.onclick = () => {
+      const nr = makeCollabRow('建議合作專業別');
+      right.insertBefore(nr, addC);
+      nr.querySelector('.collab-name').focus();
+    };
+    right.appendChild(addC);
+
+    row.appendChild(left); row.appendChild(div); row.appendChild(right);
+    body.appendChild(row);
+  });
+
+  // 新增小組按鈕
+  const addGrpBtn = document.createElement('button');
+  addGrpBtn.className = 'add-group-btn';
+  addGrpBtn.textContent = '＋ 新增小組';
+  addGrpBtn.onclick = () => addGroupToCard(body, dc, chain.ac);
+  body.appendChild(addGrpBtn);
+
+  card.appendChild(body);
+  return card;
+}
+
+// ══ 動態新增小組到卡片 ══
+function addGroupToCard(body, dc, ac) {
+  const labelText = prompt('小組名稱（可留空，代表無小組標籤）：', '');
+  if (labelText === null) return; // 取消
+
+  // 在「新增小組」按鈕前插入
+  const addGrpBtn = body.querySelector('.add-group-btn');
+
+  // 分隔線
+  const sep = document.createElement('hr');
+  sep.className = 'group-sep';
+  body.insertBefore(sep, addGrpBtn);
+
+  // 小組標籤（含刪除整組按鈕）
+  if (labelText.trim()) {
+    const lblRow = document.createElement('div');
+    lblRow.style.display = 'flex'; lblRow.style.alignItems = 'center'; lblRow.style.marginBottom = '1.5pt';
+    const lbl = document.createElement('span');
+    lbl.className = 'group-label'; lbl.contentEditable = 'true'; lbl.textContent = labelText;
+    const delGrp = document.createElement('button');
+    delGrp.className = 'del-group-btn'; delGrp.textContent = '✕ 刪除小組';
+    delGrp.onclick = () => {
+      if (confirm('確定要刪除「' + lbl.textContent + '」小組嗎？')) {
+        // 刪除從這個 lblRow 到下一個 group-sep 或 add-group-btn 之前的所有元素
+        const toRemove = [sep, lblRow];
+        let el = lblRow.nextElementSibling;
+        while (el && !el.classList.contains('add-group-btn') && !el.classList.contains('group-sep')) {
+          toRemove.push(el); el = el.nextElementSibling;
+        }
+        toRemove.forEach(e => e.remove());
+      }
+    };
+    lblRow.appendChild(lbl); lblRow.appendChild(delGrp);
+    body.insertBefore(lblRow, addGrpBtn);
+  }
+
+  // group-row（左：會員，右：合作）
+  const row = document.createElement('div');
+  row.className = 'group-row';
+
+  const left = document.createElement('div');
+  const newM = makeMemberRow('姓名','專業別', dc);
+  left.appendChild(newM);
+  const addM = document.createElement('button');
+  addM.className = 'add-member-btn'; addM.textContent = '＋ 新增會員';
+  addM.onclick = () => {
+    const nr = makeMemberRow('姓名','專業別', dc);
+    left.insertBefore(nr, addM); nr.querySelector('.m-name').focus();
+  };
+  left.appendChild(addM);
+
+  const divEl = document.createElement('div');
+  divEl.className = 'col-divider';
+
+  const right = document.createElement('div');
+  const collabLabel = document.createElement('div');
+  collabLabel.className = 'collab-section-label'; collabLabel.textContent = '招募專業別';
+  right.appendChild(collabLabel);
+  const newC = makeCollabRow('建議合作專業別');
+  right.appendChild(newC);
+  const addC = document.createElement('button');
+  addC.className = 'add-collab-btn'; addC.textContent = '＋ 新增合作對象';
+  addC.onclick = () => {
+    const nr = makeCollabRow('建議合作專業別');
+    right.insertBefore(nr, addC); nr.querySelector('.collab-name').focus();
+  };
+  right.appendChild(addC);
+
+  row.appendChild(left); row.appendChild(divEl); row.appendChild(right);
+  body.insertBefore(row, addGrpBtn);
+  newM.querySelector('.m-name').focus();
+}
+
+
+// ══ 色系選項 ══
+const ACCENT_OPTIONS = [
+  {ac:'ac-purple', color:'#7060C8', label:'紫'},
+  {ac:'ac-coral',  color:'#C84820', label:'橘紅'},
+  {ac:'ac-amber',  color:'#B88A00', label:'金'},
+  {ac:'ac-teal',   color:'#108870', label:'青'},
+  {ac:'ac-green',  color:'#448820', label:'綠'},
+  {ac:'ac-pink',   color:'#C03870', label:'粉'},
+  {ac:'ac-gray',   color:'#806848', label:'灰'},
+  {ac:'ac-blue',   color:'#1858B8', label:'藍'},
+];
+let selectedAc = 'ac-teal';
+
+function openAddChainModal() {
+  selectedAc = 'ac-teal';
+  document.getElementById('new-chain-name').value = '';
+  document.getElementById('new-chain-aud').value = '';
+  document.getElementById('new-chain-group').value = '';
+  // 建立色系格
+  const grid = document.getElementById('color-grid');
+  grid.innerHTML = '';
+  ACCENT_OPTIONS.forEach(opt => {
+    const div = document.createElement('div');
+    div.className = 'color-opt' + (opt.ac === selectedAc ? ' selected' : '');
+    div.style.background = opt.color;
+    div.title = opt.label;
+    div.onclick = () => {
+      selectedAc = opt.ac;
+      grid.querySelectorAll('.color-opt').forEach(d => d.classList.remove('selected'));
+      div.classList.add('selected');
+    };
+    grid.appendChild(div);
+  });
+  document.getElementById('add-chain-modal').classList.add('open');
+  setTimeout(() => document.getElementById('new-chain-name').focus(), 100);
+}
+
+function closeAddChainModal() {
+  document.getElementById('add-chain-modal').classList.remove('open');
+}
+
+function confirmAddChain() {
+  const name  = document.getElementById('new-chain-name').value.trim();
+  const aud   = document.getElementById('new-chain-aud').value.trim();
+  const grpLbl= document.getElementById('new-chain-group').value.trim();
+  if (!name) { alert('請填寫服務鏈名稱'); return; }
+  const newChain = {
+    ac: selectedAc,
+    name,
+    aud: aud || '客群：',
+    groups: [{ label: grpLbl, members: [['姓名','專業別']], collab: ['建議合作專業別'] }]
+  };
+  const grid = document.getElementById('main-grid');
+  grid.appendChild(buildCard(newChain));
+  closeAddChainModal();
+  showToast('✅ 已新增「' + name + '」服務鏈！記得按☁️儲存到雲端。');
+}
+
+// 點擊遮罩關閉
+document.getElementById('add-chain-modal').addEventListener('click', function(e){
+  if (e.target === this) closeAddChainModal();
+});
+
+// ══ 全頁渲染 ══
+function renderAll(data) {
+  document.getElementById('poster-title').innerText   = data.title    || '';
+  document.getElementById('poster-subtitle').innerText= data.subtitle || '';
+  document.getElementById('slogan1').innerText         = data.slogan1  || '';
+  document.getElementById('slogan2').innerText         = data.slogan2  || '';
+  document.getElementById('poster-footer').innerText  = data.footer   || '';
+  const grid = document.getElementById('main-grid');
+  grid.innerHTML = '';
+  (data.chains || []).forEach(c => grid.appendChild(buildCard(c)));
+}
+
+// 初始化：先顯示預設資料，再自動從雲端載入
+renderAll(DEFAULT_DATA);
+autoLoadFromCloud();
+</script>
+
+<!-- ══ 新增服務鏈 Modal ══ -->
+<div class="modal-overlay" id="add-chain-modal">
+  <div class="modal-box">
+    <h3>➕ 新增產業服務鏈</h3>
+    <label>服務鏈名稱</label>
+    <input type="text" id="new-chain-name" placeholder="例：健康美容服務團隊">
+    <label>目標客群說明</label>
+    <input type="text" id="new-chain-aud" placeholder="例：客群：30-50歲注重養生的消費者">
+    <label>第一個小組名稱（可空白）</label>
+    <input type="text" id="new-chain-group" placeholder="例：美容保養組（空白則不建立小組）">
+    <label>色系</label>
+    <div class="color-grid" id="color-grid"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeAddChainModal()">取消</button>
+      <button class="btn-modal-ok" onclick="confirmAddChain()">新增</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
