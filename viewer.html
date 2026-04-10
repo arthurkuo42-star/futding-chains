@@ -547,7 +547,7 @@ window.renderAll = function(data) {
   setTimeout(openFirstCard, 50);
 };
 
-// ══ 匯出高解析圖片 ══
+// ══ 匯出高解析圖片（A4 橫向、高對比深色版）══
 async function exportImage() {
   const btn     = document.getElementById('export-btn');
   const overlay = document.getElementById('export-overlay');
@@ -562,6 +562,7 @@ async function exportImage() {
   overlay.classList.add('show');
   msg.textContent = '準備中…';
 
+  // 隱藏狀態列
   const statusBar = document.getElementById('status-bar');
   statusBar.style.display = 'none';
 
@@ -570,71 +571,184 @@ async function exportImage() {
     await new Promise(r => setTimeout(r, 200));
     msg.textContent = '截圖中，請稍候…';
 
-    // 截圖目標：只截海報主體（status-bar 以下的部分）
-    const target = document.body;
+    // A4 橫向 300dpi 尺寸：3508 × 2480 px
+    const A4_W = 3508;
+    const A4_H = 2480;
 
-    const canvas = await html2canvas(target, {
-      scale: 3,
+    const canvas = await html2canvas(document.body, {
+      scale: 4,                      // 高解析
       useCORS: true,
       allowTaint: false,
-      backgroundColor: '#FDFAF2',
+      backgroundColor: '#FFFFFF',
       logging: false,
-      // onclone：在複製的 DOM 上做修正，不影響原始頁面
       onclone: (clonedDoc) => {
-        // 1. 隱藏不需要截圖的元素
+        // 1. 隱藏不需要的元素
         ['export-overlay','loading','status-bar'].forEach(id => {
           const el = clonedDoc.getElementById(id);
           if (el) el.style.display = 'none';
         });
 
-        // 2. 強制展開所有折疊的 card-body（手機折疊版）
+        // 2. 強制展開所有折疊的卡片
         clonedDoc.querySelectorAll('.card-body').forEach(el => {
           el.style.display = 'block';
         });
 
-        // 3. 把所有漸層背景改成純色，避免 createPattern 錯誤
-        clonedDoc.querySelectorAll('*').forEach(el => {
-          const style = window.getComputedStyle(el);
-          const bg = style.backgroundImage;
-          // 如果是漸層，用 getComputedStyle 的 backgroundColor 替代
-          if (bg && bg.startsWith('linear-gradient')) {
-            try {
-              const fallback = style.backgroundColor || 'transparent';
-              el.style.backgroundImage = 'none';
-              if (fallback !== 'rgba(0, 0, 0, 0)' && fallback !== 'transparent') {
-                el.style.backgroundColor = fallback;
-              }
-            } catch(e) { /* 忽略無法設定的元素 */ }
-          }
-          // 4. 確保沒有零尺寸元素阻塞 canvas
-          if (el.offsetWidth === 0 || el.offsetHeight === 0) {
-            if (el.tagName !== 'HR' && el.tagName !== 'BR') {
-              el.style.minWidth  = '1px';
-              el.style.minHeight = '1px';
-            }
-          }
-        });
+        // 3. 套用高對比深色樣式
+        const style = clonedDoc.createElement('style');
+        style.textContent = `
+          body { background: #FFFFFF !important; }
 
-        // 5. 修正 top-banner 在 clone 後的漸層顯示
-        const banner = clonedDoc.querySelector('.top-banner');
-        if (banner) {
-          banner.style.background = '#B8820A';
-          banner.style.backgroundImage = 'none';
-        }
-        const goldRules = clonedDoc.querySelectorAll('.gold-rule');
-        goldRules.forEach(el => {
-          el.style.background = '#C8971C';
-          el.style.backgroundImage = 'none';
-        });
+          /* ── 頂部橫幅：深金色實色 ── */
+          .top-banner {
+            background: #8B6200 !important;
+            background-image: none !important;
+          }
+          .main-title h1 { color: #FFF8DC !important; }
+          .main-title .subtitle { color: #F0D89A !important; }
+          .slogan-box {
+            background: rgba(0,0,0,0.25) !important;
+            border-color: #F0D89A !important;
+          }
+          .slogan-line1 { color: #FFFFFF !important; }
+          .slogan-line2 { color: #F0D89A !important; }
+          .diamond { color: #FFFFFF !important; }
+
+          /* ── 金色分隔線 ── */
+          .gold-rule {
+            background: #8B6200 !important;
+            background-image: none !important;
+            height: 1pt !important;
+          }
+
+          /* ── 卡片：白底深框 ── */
+          .card { border: 1pt solid #555 !important; background: #FFFFFF !important; }
+
+          /* ── 各色系標頭改為深色實色 ── */
+          .ac-purple .card-head { background: #3D2878 !important; }
+          .ac-purple .card-head-name { color: #FFFFFF !important; }
+          .ac-purple .card-head-aud  { color: #D0C8F0 !important; }
+          .ac-purple .m-dot { background: #7060C8 !important; }
+          .ac-purple .m-name { color: #1A0E50 !important; }
+          .ac-purple .m-role { color: #3D2878 !important; }
+          .ac-purple .group-label { color: #5040A0 !important; }
+          .ac-purple .collab-o { color: #9080C0 !important; }
+          .ac-purple .collab-name { color: #5040A0 !important; }
+
+          .ac-coral .card-head { background: #7A2A10 !important; }
+          .ac-coral .card-head-name { color: #FFFFFF !important; }
+          .ac-coral .card-head-aud  { color: #F0C8B0 !important; }
+          .ac-coral .m-dot { background: #C84820 !important; }
+          .ac-coral .m-name { color: #501008 !important; }
+          .ac-coral .m-role { color: #7A2A10 !important; }
+          .ac-coral .group-label { color: #903820 !important; }
+          .ac-coral .collab-o { color: #B07060 !important; }
+          .ac-coral .collab-name { color: #803020 !important; }
+
+          .ac-amber .card-head { background: #6B4A00 !important; }
+          .ac-amber .card-head-name { color: #FFFFFF !important; }
+          .ac-amber .card-head-aud  { color: #F0D8A0 !important; }
+          .ac-amber .m-dot { background: #B88A00 !important; }
+          .ac-amber .m-name { color: #3A2000 !important; }
+          .ac-amber .m-role { color: #6B4A00 !important; }
+          .ac-amber .group-label { color: #806000 !important; }
+          .ac-amber .collab-o { color: #A07800 !important; }
+          .ac-amber .collab-name { color: #705000 !important; }
+
+          .ac-teal .card-head { background: #085040 !important; }
+          .ac-teal .card-head-name { color: #FFFFFF !important; }
+          .ac-teal .card-head-aud  { color: #B0E8D8 !important; }
+          .ac-teal .m-dot { background: #108870 !important; }
+          .ac-teal .m-name { color: #033028 !important; }
+          .ac-teal .m-role { color: #085040 !important; }
+          .ac-teal .group-label { color: #0A6050 !important; }
+          .ac-teal .collab-o { color: #30A888 !important; }
+          .ac-teal .collab-name { color: #0A6050 !important; }
+
+          .ac-green .card-head { background: #204A08 !important; }
+          .ac-green .card-head-name { color: #FFFFFF !important; }
+          .ac-green .card-head-aud  { color: #C0E898 !important; }
+          .ac-green .m-dot { background: #448820 !important; }
+          .ac-green .m-name { color: #103004 !important; }
+          .ac-green .m-role { color: #204A08 !important; }
+          .ac-green .group-label { color: #306010 !important; }
+          .ac-green .collab-o { color: #50A020 !important; }
+          .ac-green .collab-name { color: #306010 !important; }
+
+          .ac-pink .card-head { background: #6A1840 !important; }
+          .ac-pink .card-head-name { color: #FFFFFF !important; }
+          .ac-pink .card-head-aud  { color: #F0C0D8 !important; }
+          .ac-pink .m-dot { background: #C03870 !important; }
+          .ac-pink .m-name { color: #400820 !important; }
+          .ac-pink .m-role { color: #6A1840 !important; }
+          .ac-pink .group-label { color: #903060 !important; }
+          .ac-pink .collab-o { color: #B06080 !important; }
+          .ac-pink .collab-name { color: #803050 !important; }
+
+          .ac-gray .card-head { background: #3A3020 !important; }
+          .ac-gray .card-head-name { color: #FFFFFF !important; }
+          .ac-gray .card-head-aud  { color: #D8C8A8 !important; }
+          .ac-gray .m-dot { background: #806848 !important; }
+          .ac-gray .m-name { color: #201808 !important; }
+          .ac-gray .m-role { color: #3A3020 !important; }
+          .ac-gray .group-label { color: #504030 !important; }
+          .ac-gray .collab-o { color: #907860 !important; }
+          .ac-gray .collab-name { color: #504030 !important; }
+
+          .ac-blue .card-head { background: #0C3878 !important; }
+          .ac-blue .card-head-name { color: #FFFFFF !important; }
+          .ac-blue .card-head-aud  { color: #B8D4F8 !important; }
+          .ac-blue .m-dot { background: #1858B8 !important; }
+          .ac-blue .m-name { color: #062040 !important; }
+          .ac-blue .m-role { color: #0C3878 !important; }
+          .ac-blue .group-label { color: #1848A0 !important; }
+          .ac-blue .collab-o { color: #4878C8 !important; }
+          .ac-blue .collab-name { color: #1848A0 !important; }
+
+          /* ── 分隔線 ── */
+          .group-sep { border-top-color: #CCC !important; }
+          .col-divider { background: #CCC !important; }
+          .collab-section-label { color: #666 !important; opacity: 1 !important; }
+
+          /* ── 頁尾 ── */
+          .footer { color: #666 !important; }
+
+          /* ── 隱藏拖拉把手 ── */
+          .drag-handle, .del-btn, .del-chain-btn, .del-group-btn,
+          .add-member-btn, .add-collab-btn, .add-group-btn,
+          .toggle-arrow, .tap-hint { display: none !important; }
+        `;
+        clonedDoc.head.appendChild(style);
       }
     });
+
+    msg.textContent = '調整尺寸為 A4 橫向…';
+
+    // ── 把截圖縮放輸出成 A4 橫向比例 ──
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width  = A4_W;
+    outCanvas.height = A4_H;
+    const ctx = outCanvas.getContext('2d');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, A4_W, A4_H);
+
+    // 等比例縮放，置中放入 A4
+    const srcW = canvas.width;
+    const srcH = canvas.height;
+    const ratioW = A4_W / srcW;
+    const ratioH = A4_H / srcH;
+    const ratio  = Math.min(ratioW, ratioH);
+    const dstW = Math.round(srcW * ratio);
+    const dstH = Math.round(srcH * ratio);
+    const dstX = Math.round((A4_W - dstW) / 2);
+    const dstY = Math.round((A4_H - dstH) / 2);
+    ctx.drawImage(canvas, dstX, dstY, dstW, dstH);
 
     msg.textContent = '下載中…';
     const link = document.createElement('a');
     const now  = new Date();
     const ts   = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
-    link.download = '富鼎分會_產業服務鏈_' + ts + '.png';
-    link.href = canvas.toDataURL('image/png', 1.0);
+    link.download = '富鼎分會_產業服務鏈_A4_' + ts + '.png';
+    link.href = outCanvas.toDataURL('image/png', 1.0);
     link.click();
 
   } catch(err) {
