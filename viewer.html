@@ -299,9 +299,9 @@ body {
 <div id="poster-footer" class="footer">◆　BNI 高雄富鼎分會　第16屆　產業服務鏈引薦地圖　◆</div>
 
 <script>
-const JSONBIN_API_KEY = '$2a$10$ndmO5rCJp5kV9MdiS9DAq.5k9n1PSTRNxjsT4dbx.NyFt7klXoq6C';
-const JSONBIN_BIN_ID  = '69c36e59aa77b81da9185a96';
-const JSONBIN_URL     = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+// ══ 後端 Proxy 設定（透過 bni-kpi 代打 JSONBin，避免金鑰外洩） ══
+const PROXY_BASE = 'https://bni-kpi-production.up.railway.app';
+const CHAINS_API = `${PROXY_BASE}/api/chains-data`;
 
 const DEFAULT_DATA = {
   title: "BNI 高雄富鼎分會　第16屆產業服務鏈分組",
@@ -502,20 +502,18 @@ function renderAll(data) {
 // ── 從雲端載入 ──
 async function loadFromCloud() {
   try {
-    const res = await fetch(JSONBIN_URL + '/latest', {
-      headers: { 'X-Master-Key': JSONBIN_API_KEY }
-    });
+    const res = await fetch(CHAINS_API);
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    const data = json.record;
+    const data = await res.json();
     if (data && data.chains && data.chains.length > 0) {
       renderAll(data);
-      // 顯示更新時間
-      const meta = json.metadata;
-      if (meta && meta.createdAt) {
-        const d = new Date(meta.createdAt);
+      // 顯示更新時間（由 index.html 儲存時寫入 data.updatedAt）
+      if (data.updatedAt) {
+        const d = new Date(data.updatedAt);
         const ts = d.toLocaleDateString('zh-TW') + ' ' + d.toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit'});
         document.getElementById('update-time').textContent = '最後更新：' + ts;
+      } else {
+        document.getElementById('update-time').textContent = '已載入雲端資料';
       }
     } else {
       renderAll(DEFAULT_DATA);

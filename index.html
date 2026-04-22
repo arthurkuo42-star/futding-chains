@@ -480,24 +480,41 @@ function readCurrentData() {
   return data;
 }
 
-// ══ JSONbin.io 設定 ══
-const JSONBIN_API_KEY = '$2a$10$ndmO5rCJp5kV9MdiS9DAq.5k9n1PSTRNxjsT4dbx.NyFt7klXoq6C';
-const JSONBIN_BIN_ID  = '69c36e59aa77b81da9185a96';
-const JSONBIN_URL     = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+// ══ 後端 Proxy 設定（透過 bni-kpi 代打 JSONBin，避免金鑰外洩） ══
+const PROXY_BASE   = 'https://bni-kpi-production.up.railway.app';
+const CHAINS_API   = `${PROXY_BASE}/api/chains-data`;
+const ADMIN_KEY_LS = 'futding_chains_admin_key';
+
+function getAdminKey() {
+  let k = localStorage.getItem(ADMIN_KEY_LS) || '';
+  if (!k) {
+    k = prompt('請輸入管理員金鑰（只會要求一次，儲存於本機）：') || '';
+    if (k) localStorage.setItem(ADMIN_KEY_LS, k);
+  }
+  return k;
+}
 
 // ══ 儲存到雲端 ══
 async function cloudSave() {
+  const adminKey = getAdminKey();
+  if (!adminKey) { showToast('❌ 未輸入管理員金鑰，取消儲存'); return; }
   showToast('☁️ 儲存中…');
   const data = readCurrentData();
+  data.updatedAt = new Date().toISOString();
   try {
-    const res = await fetch(JSONBIN_URL, {
+    const res = await fetch(CHAINS_API, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Master-Key': JSONBIN_API_KEY
+        'X-Admin-Key': adminKey
       },
       body: JSON.stringify(data)
     });
+    if (res.status === 401) {
+      localStorage.removeItem(ADMIN_KEY_LS);
+      showToast('❌ 管理員金鑰錯誤，已清除本機快取，請重試');
+      return;
+    }
     if (!res.ok) throw new Error('HTTP ' + res.status);
     showToast('✅ 已儲存到雲端！所有人開啟網址都會看到最新版本。');
   } catch(err) {
@@ -509,12 +526,9 @@ async function cloudSave() {
 async function cloudLoad() {
   showToast('☁️ 載入中…');
   try {
-    const res = await fetch(JSONBIN_URL + '/latest', {
-      headers: { 'X-Master-Key': JSONBIN_API_KEY }
-    });
+    const res = await fetch(CHAINS_API);
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    const data = json.record;
+    const data = await res.json();
     if (!data.chains) throw new Error('雲端資料格式不符');
     renderAll(data);
     showToast('✅ 已從雲端載入最新版本！');
@@ -526,12 +540,9 @@ async function cloudLoad() {
 // ══ 頁面載入時自動從雲端拉取最新資料 ══
 async function autoLoadFromCloud() {
   try {
-    const res = await fetch(JSONBIN_URL + '/latest', {
-      headers: { 'X-Master-Key': JSONBIN_API_KEY }
-    });
+    const res = await fetch(CHAINS_API);
     if (!res.ok) return; // 靜默失敗，使用預設資料
-    const json = await res.json();
-    const data = json.record;
+    const data = await res.json();
     if (data && data.chains && data.chains.length > 0) {
       renderAll(data);
     }
