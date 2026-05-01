@@ -294,6 +294,19 @@ div.drop-zone-active {
 @media print {
   .add-group-btn, .del-group-btn, .del-chain-btn { display: none !important; }
 }
+
+/* ── 純名單模式（隱藏招募專業別欄）──
+   套用 body.members-only：
+   - .group-row 從 3 欄改為 1 欄
+   - 隱藏分隔線、右欄（第 3 個 grid item）、所有 collab 元素
+   - 副標的 collab 提示文字也順便隱藏
+*/
+body.members-only .group-row { grid-template-columns: 1fr !important; }
+body.members-only .group-row > .col-divider,
+body.members-only .group-row > div:nth-child(3) { display: none !important; }
+body.members-only .collab-section-label,
+body.members-only .collab-item,
+body.members-only .add-collab-btn { display: none !important; }
 </style>
 </head>
 <body>
@@ -311,6 +324,7 @@ div.drop-zone-active {
   <input type="file" id="load-input" accept=".json" onchange="loadBackup(event)">
   <div class="sep"></div>
   <button class="btn-print" onclick="window.print()">🖨️ 列印 / 儲存 PDF</button>
+  <button class="btn-print" onclick="printMembersOnly()">🖨️ 列印純名單</button>
 </div>
 
 <div id="toast">✅ 備份已儲存！</div>
@@ -549,6 +563,31 @@ async function autoLoadFromCloud() {
   } catch(err) {
     // 靜默失敗，使用預設資料
   }
+}
+
+// ══ 列印純名單（暫時隱藏招募專業別 + 改副標 → 列印 → 還原）══
+function printMembersOnly() {
+  const subtitle = document.getElementById('poster-subtitle');
+  const originalSubtitle = subtitle ? subtitle.innerText : '';
+  // 暫時改副標：去掉「○ 建議招募...」那段
+  if (subtitle) subtitle.innerText = '● 現有分會夥伴產業服務鏈名單';
+  document.body.classList.add('members-only');
+
+  // 列印對話框關閉後（含取消）→ 還原
+  // 用 onafterprint 主要事件；setTimeout 保底（瀏覽器若沒觸發 afterprint）
+  let restored = false;
+  const restore = () => {
+    if (restored) return;
+    restored = true;
+    document.body.classList.remove('members-only');
+    if (subtitle) subtitle.innerText = originalSubtitle;
+    window.removeEventListener('afterprint', restore);
+  };
+  window.addEventListener('afterprint', restore);
+  setTimeout(restore, 60000); // 60 秒保底，避免狀態卡死
+
+  // 給 CSS 一個 frame 套用後再呼叫 print
+  requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
 }
 
 // ══ 備份匯出 ══
