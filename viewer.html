@@ -273,8 +273,9 @@ body {
     <span>👁 檢視模式</span>
     <span class="badge" id="update-time">載入中…</span>
   </div>
-  <div style="display:flex;gap:8px;align-items:center">
-    <button class="btn-export" id="export-btn" onclick="exportImage()">📷 匯出高解析圖片</button>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+    <button class="btn-export" id="export-btn" onclick="exportImage(false)">📷 匯出高解析圖片</button>
+    <button class="btn-export" id="export-btn-members" onclick="exportImage(true)">👥 匯出會員名單圖片</button>
     <a class="edit-link" href="./index.html">✏️ 前往編輯版</a>
   </div>
 </div>
@@ -546,8 +547,9 @@ window.renderAll = function(data) {
 };
 
 // ══ 匯出高解析圖片（A4 橫向、高對比深色版）══
-async function exportImage() {
-  const btn     = document.getElementById('export-btn');
+// membersOnly = true 時，僅輸出現有會員（隱藏招募專業別欄位與空組）
+async function exportImage(membersOnly = false) {
+  const btns    = document.querySelectorAll('.btn-export');
   const overlay = document.getElementById('export-overlay');
   const msg     = document.getElementById('exp-msg');
 
@@ -556,9 +558,9 @@ async function exportImage() {
     return;
   }
 
-  btn.disabled = true;
+  btns.forEach(b => b.disabled = true);
   overlay.classList.add('show');
-  msg.textContent = '準備中…';
+  msg.textContent = membersOnly ? '準備中（僅會員名單）…' : '準備中…';
 
   // 隱藏狀態列
   const statusBar = document.getElementById('status-bar');
@@ -715,6 +717,44 @@ async function exportImage() {
           .add-member-btn, .add-collab-btn, .add-group-btn,
           .toggle-arrow, .tap-hint { display: none !important; }
         `;
+
+        // ── 僅會員名單模式：追加額外處理 ──
+        if (membersOnly) {
+          // 4-1. 追加 CSS：隱藏招募欄位、組內版面改單欄
+          style.textContent += `
+            .collab-section-label,
+            .collab-item,
+            .col-divider { display: none !important; }
+            .group-row { grid-template-columns: 1fr !important; }
+          `;
+
+          // 4-2. 改副標題：只保留「現有夥伴」說明
+          const subtitle = clonedDoc.getElementById('poster-subtitle');
+          if (subtitle) subtitle.textContent = '● 現有分會夥伴（深色粗體）';
+
+          // 4-3. 移除沒有會員的小組（連同其上方的 group-label / group-sep 一併移除）
+          clonedDoc.querySelectorAll('.group-row').forEach(row => {
+            const left = row.firstElementChild;
+            const hasMembers = left && left.querySelector('.member-item');
+            if (!hasMembers) {
+              let prev = row.previousElementSibling;
+              while (prev && (prev.classList.contains('group-label') || prev.classList.contains('group-sep'))) {
+                const toRemove = prev;
+                prev = prev.previousElementSibling;
+                toRemove.remove();
+              }
+              row.remove();
+            }
+          });
+
+          // 4-4. 若整張卡片所有組都被移除，連卡片也隱藏
+          clonedDoc.querySelectorAll('.card').forEach(card => {
+            if (!card.querySelector('.group-row')) {
+              card.style.display = 'none';
+            }
+          });
+        }
+
         clonedDoc.head.appendChild(style);
       }
     });
@@ -745,7 +785,8 @@ async function exportImage() {
     const link = document.createElement('a');
     const now  = new Date();
     const ts   = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
-    link.download = '富鼎分會_產業服務鏈_A4_' + ts + '.png';
+    const suffix = membersOnly ? '_僅會員' : '';
+    link.download = '富鼎分會_產業服務鏈' + suffix + '_A4_' + ts + '.png';
     link.href = outCanvas.toDataURL('image/png', 1.0);
     link.click();
 
@@ -754,7 +795,7 @@ async function exportImage() {
   } finally {
     statusBar.style.display = '';
     overlay.classList.remove('show');
-    btn.disabled = false;
+    btns.forEach(b => b.disabled = false);
   }
 }
 
