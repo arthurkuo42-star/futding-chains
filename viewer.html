@@ -254,6 +254,91 @@ body {
   font-size: 11px; color: #B8A060;
   font-family: "Microsoft JhengHei", sans-serif;
 }
+
+/* ══════════ A4 直立海報（離屏渲染，匯出時才顯示） ══════════ */
+#poster-a4 {
+  display: none;
+  position: absolute; left: -99999px; top: 0;
+  width: 840px;                 /* 基準寬，匯出時 html2canvas scale 放大到 300dpi */
+  min-height: 1188px;           /* A4 比例 1:1.414 */
+  background: #FEFCF6;
+  padding: 20px 20px 0;
+  font-family: "Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;
+  color: #2A1F00;
+}
+#poster-a4.pa4-visible { display: block; }
+/* 頂部品牌區 */
+.pa4-header { display: flex; align-items: stretch; gap: 12px; margin-bottom: 12px; }
+.pa4-logo {
+  position: relative; width: 128px; flex-shrink: 0;
+  background: linear-gradient(135deg,#9A1B1B,#C0272D);
+  clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px 0 0 8px; overflow: hidden;
+}
+.pa4-logo::after {
+  content:""; position:absolute; top:0; bottom:0; right:10%; width:2px;
+  background: linear-gradient(180deg,transparent,#E8C86A,#F0D89A,#E8C86A,transparent);
+  transform: skewX(-9deg);
+}
+.pa4-logo b { color:#FFF; font-size:38px; font-weight:900; letter-spacing:1px; z-index:1; }
+.pa4-titlewrap { flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center; }
+.pa4-titlewrap h1 { font-size:29px; font-weight:900; color:#5A3B0A; letter-spacing:2px; line-height:1.15; }
+.pa4-titlewrap .pa4-sub2 { font-size:15px; font-weight:700; color:#8A6412; letter-spacing:3px; margin-top:2px; }
+.pa4-legend { font-size:10.5px; color:#9A7A2A; margin-top:5px; letter-spacing:0.5px; }
+.pa4-legend b { color:#5A3B0A; } .pa4-legend .pa4-o { color:#C0A860; }
+.pa4-slogan {
+  width: 172px; flex-shrink:0; border-radius:8px; padding:10px 8px;
+  background: linear-gradient(135deg,#6B4A0A,#9A6E14 45%,#7A560E);
+  border:1.5px solid #E8C86A; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center;
+}
+.pa4-slogan .s1 { font-size:16px; font-weight:900; color:#FFF6D8; letter-spacing:3px; line-height:1.3; }
+.pa4-slogan .s2 { font-size:10.5px; font-weight:600; color:#F0D89A; letter-spacing:1px; margin-top:3px; }
+/* 九宮格 */
+.pa4-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; align-items:start; }
+.pa4-card {
+  border:1.5px solid var(--bd); border-radius:12px; overflow:hidden; background:#FFF;
+  box-shadow:0 1px 4px rgba(120,80,0,0.08);
+}
+.pa4-cardhead { background:var(--hd); padding:6px 9px; display:flex; align-items:center; gap:6px; }
+.pa4-num { font-size:17px; font-weight:900; color:rgba(255,255,255,0.9); font-family:"Arial Black",sans-serif; line-height:1; }
+.pa4-htext { flex:1; min-width:0; }
+.pa4-hname { font-size:14.5px; font-weight:900; color:#FFF; line-height:1.15; letter-spacing:0.3px; }
+.pa4-haud { font-size:8.5px; color:rgba(255,255,255,0.82); line-height:1.2; margin-top:1px; }
+.pa4-hicon { flex-shrink:0; width:22px; height:22px; }
+.pa4-hicon svg { width:22px; height:22px; stroke:#FFF; fill:none; stroke-width:1.7; }
+.pa4-cardbody { padding:7px 9px 8px; }
+.pa4-grp + .pa4-grp { border-top:1px solid var(--bd); margin-top:5px; padding-top:5px; }
+.pa4-glabel { font-size:8.5px; font-weight:700; color:var(--sub); letter-spacing:0.5px; margin-bottom:3px; }
+.pa4-cols { display:grid; grid-template-columns:1fr 1px 0.92fr; gap:0 7px; }
+.pa4-vdiv { background:var(--bd); align-self:stretch; }
+.pa4-mrow { display:flex; align-items:flex-start; gap:4px; margin-bottom:3px; }
+.pa4-mdot { width:5px; height:5px; border-radius:50%; background:var(--hd); flex-shrink:0; margin-top:5px; }
+.pa4-mname { font-size:13px; font-weight:700; color:var(--tx); line-height:1.2; }
+.pa4-mrole { font-size:8.5px; color:var(--sub); line-height:1.15; }
+.pa4-clabel { font-size:8px; font-weight:700; color:var(--sub); opacity:0.75; letter-spacing:0.5px; margin-bottom:2px; }
+.pa4-crow { display:flex; align-items:flex-start; gap:3px; margin-bottom:2.5px; }
+.pa4-co { font-size:7px; color:var(--sub); margin-top:2px; flex-shrink:0; }
+.pa4-cname { font-size:9.5px; font-weight:600; color:var(--sub); line-height:1.25; }
+/* 底部品牌帶 */
+.pa4-footer {
+  margin:11px -20px 0; padding:11px 24px;
+  background: linear-gradient(90deg,#8A1420,#B0202C 50%,#8A1420);
+  display:flex; align-items:center; justify-content:center; gap:14px;
+}
+.pa4-footer .node { color:#E8C86A; font-size:13px; letter-spacing:2px; }
+.pa4-footer .fname { color:#FFF6E0; font-size:13.5px; font-weight:700; letter-spacing:4px; }
+/* 九組識別色 */
+.pa4-c1 { --hd:#3D2878; --tx:#241660; --sub:#7C6CB0; --bd:#C4B2E4; }
+.pa4-c2 { --hd:#B03418; --tx:#5A1608; --sub:#BE7658; --bd:#E6B29C; }
+.pa4-c3 { --hd:#3F5510; --tx:#26330A; --sub:#7C8C4A; --bd:#BCCE86; }
+.pa4-c4 { --hd:#7A1840; --tx:#450A26; --sub:#BC6488; --bd:#E6A0C0; }
+.pa4-c5 { --hd:#4A3520; --tx:#241608; --sub:#96795A; --bd:#CBB48E; }
+.pa4-c6 { --hd:#085040; --tx:#043228; --sub:#4A9A82; --bd:#84C8B0; }
+.pa4-c7 { --hd:#0C3878; --tx:#071E44; --sub:#5A7CB4; --bd:#98BEE8; }
+.pa4-c8 { --hd:#6A1840; --tx:#3E0A24; --sub:#B26488; --bd:#E2A6C2; }
+.pa4-c9 { --hd:#6B4A00; --tx:#3A2600; --sub:#A88C42; --bd:#DCBE68; }
 </style>
 </head>
 <body>
@@ -274,6 +359,7 @@ body {
     <span class="badge" id="update-time">載入中…</span>
   </div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+    <button class="btn-export" id="export-btn-a4" onclick="exportA4Portrait()">📄 A4 直立海報</button>
     <button class="btn-export" id="export-btn" onclick="exportImage(false)">📷 匯出高解析圖片</button>
     <button class="btn-export" id="export-btn-members" onclick="exportImage(true)">👥 匯出會員名單圖片</button>
     <a class="edit-link" href="./index.html">✏️ 前往編輯版</a>
@@ -298,6 +384,9 @@ body {
 <div class="grid" id="main-grid"></div>
 <div class="gold-rule" style="margin-top:2.5mm;margin-bottom:0"></div>
 <div id="poster-footer" class="footer">◆　BNI 高雄富鼎分會　第16屆　產業服務鏈引薦地圖　◆</div>
+
+<!-- A4 直立海報離屏畫布（匯出時 JS 填充 + html2canvas 截圖） -->
+<div id="poster-a4"></div>
 
 <script>
 // ══ 後端 Proxy 設定（透過 bni-kpi 代打 JSONBin，避免金鑰外洩） ══
@@ -490,6 +579,7 @@ function buildCard(chain) {
 
 // ── 全頁渲染 ──
 function renderAll(data) {
+  window.__chainsData = data;   // 供 A4 直立海報匯出使用
   document.getElementById('poster-title').textContent   = data.title    || '';
   document.getElementById('poster-subtitle').textContent= data.subtitle || '';
   document.getElementById('slogan1').textContent         = data.slogan1  || '';
@@ -796,6 +886,100 @@ async function exportImage(membersOnly = false) {
     statusBar.style.display = '';
     overlay.classList.remove('show');
     btns.forEach(b => b.disabled = false);
+  }
+}
+
+// ══════════ A4 直立海報（紅金企業風、文字全綁雲端資料）══════════
+function esc(s){ return String(s==null?'':s).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
+// 白色扁平線性圖示（依團隊名關鍵字對應）
+const PA4_ICON = {
+  building:'<path d="M4 3h16v18H4zM8 7h.5M12 7h.5M16 7h.5M8 11h.5M12 11h.5M16 11h.5M8 15h.5M16 15h.5M10 21v-4h4v4"/>',
+  bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.5 1 2.5h6c0-1 .4-1.9 1-2.5A6 6 0 0 0 12 3z"/>',
+  food:'<path d="M6 3v6a2 2 0 0 0 4 0V3M8 9v12M16 3c-1.5 0-2 2.2-2 4.5s.6 3.5 2 3.5v10"/>',
+  heart:'<path d="M12 21C5 15 3 11 3 7.6A4 4 0 0 1 12 6a4 4 0 0 1 9 1.6C21 11 19 15 12 21z"/>',
+  home:'<path d="M3 11l9-7 9 7M5 10v10h14V10"/>',
+  diamond:'<path d="M6 3h12l3 6-9 12L3 9z"/>',
+  cap:'<path d="M12 4L2 9l10 5 10-5-10-5zM6 11.5V16c0 1.2 3 3 6 3s6-1.8 6-3v-4.5"/>',
+  bag:'<path d="M6 8h12l-1 12H7L6 8zM9 8V6a3 3 0 0 1 6 0v2"/>',
+  coffee:'<path d="M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8zM17 9h2a2 2 0 0 1 0 4h-2M8 3v2M12 3v2"/>',
+  star:'<path d="M12 3l2.6 6 6.4.5-4.9 4.2 1.5 6.3L12 16.5 6.4 20l1.5-6.3L3 9.5 9.4 9z"/>'
+};
+function posterIconSvg(name){
+  const n = name || '';
+  let k = 'star';
+  if (/企業|公司|辦公/.test(n)) k='building';
+  else if (/品牌|行銷|造夢|設計/.test(n)) k='bulb';
+  else if (/餐飲|食品|美食/.test(n)) k='food';
+  else if (/健康|生命|醫|長照/.test(n)) k='heart';
+  else if (/屋主|居家|房|不動產|修繕/.test(n)) k='home';
+  else if (/高資產|資產|財富|理財/.test(n)) k='diamond';
+  else if (/教育|菁英|學|升學/.test(n)) k='cap';
+  else if (/質威|生活|寵|親子|服飾/.test(n)) k='bag';
+  else if (/品味|日常|咖啡|餐/.test(n)) k='coffee';
+  return '<svg viewBox="0 0 24 24">'+PA4_ICON[k]+'</svg>';
+}
+
+function buildPosterA4(data){
+  const chains = data.chains || [];
+  const cards = chains.map((c,i)=>{
+    const cls = 'pa4-c' + ((i%9)+1);
+    const groups = (c.groups||[]).map(g=>{
+      const members = (g.members||[]).map(m=>{
+        const nm = Array.isArray(m)?m[0]:m.name, ro = Array.isArray(m)?m[1]:m.role;
+        return '<div class="pa4-mrow"><div class="pa4-mdot"></div><div><div class="pa4-mname">'+esc(nm)+'</div><div class="pa4-mrole">'+esc(ro)+'</div></div></div>';
+      }).join('');
+      const collab = (g.collab||[]).map(x=>'<div class="pa4-crow"><span class="pa4-co">○</span><span class="pa4-cname">'+esc(x)+'</span></div>').join('');
+      return '<div class="pa4-grp">'+(g.label?'<div class="pa4-glabel">'+esc(g.label)+'</div>':'')+
+        '<div class="pa4-cols"><div>'+members+'</div><div class="pa4-vdiv"></div><div><div class="pa4-clabel">招募專業別</div>'+collab+'</div></div></div>';
+    }).join('');
+    return '<div class="pa4-card '+cls+'"><div class="pa4-cardhead"><span class="pa4-num">'+String(i+1).padStart(2,'0')+
+      '</span><div class="pa4-htext"><div class="pa4-hname">'+esc(c.name)+'</div><div class="pa4-haud">'+esc(c.aud||'')+
+      '</div></div><span class="pa4-hicon">'+posterIconSvg(c.name)+'</span></div><div class="pa4-cardbody">'+groups+'</div></div>';
+  }).join('');
+  document.getElementById('poster-a4').innerHTML =
+    '<div class="pa4-header"><div class="pa4-logo"><b>BNI</b></div>'+
+    '<div class="pa4-titlewrap"><h1>BNI 高雄富鼎分會</h1><div class="pa4-sub2">第16屆　產業服務鏈分組</div>'+
+    '<div class="pa4-legend"><b>● 現有分會夥伴</b>　<span class="pa4-o">○ 建議招募合作專業別</span></div></div>'+
+    '<div class="pa4-slogan"><div class="s1">富鼎富鼎<br>又富又鼎</div><div class="s2">團隊上百人　引薦破百倍</div></div></div>'+
+    '<div class="pa4-grid">'+cards+'</div>'+
+    '<div class="pa4-footer"><span class="node">◆◇◆</span><span class="fname">BNI 高雄富鼎分會　第16屆產業服務鏈引薦地圖</span><span class="node">◆◇◆</span></div>';
+}
+
+async function exportA4Portrait(){
+  const btns = document.querySelectorAll('.btn-export');
+  const overlay = document.getElementById('export-overlay');
+  const msg = document.getElementById('exp-msg');
+  if (typeof html2canvas === 'undefined') { alert('❌ 圖片套件載入失敗，請重新整理頁面後再試。'); return; }
+  const poster = document.getElementById('poster-a4');
+  btns.forEach(b=>b.disabled=true);
+  overlay.classList.add('show');
+  msg.textContent = '排版 A4 直立海報中…';
+  try {
+    buildPosterA4(window.__chainsData || DEFAULT_DATA);
+    poster.classList.add('pa4-visible');
+    await document.fonts.ready;
+    await new Promise(r=>setTimeout(r,300));
+    msg.textContent = '產生高解析圖片中…';
+    const canvas = await html2canvas(poster, { scale:3, useCORS:true, backgroundColor:'#FEFCF6', logging:false, width:840, windowWidth:900 });
+    // 貼進 A4 直立 2480×3508（300dpi），等比置中
+    const A4W=2480, A4H=3508;
+    const out=document.createElement('canvas'); out.width=A4W; out.height=A4H;
+    const ctx=out.getContext('2d'); ctx.fillStyle='#FEFCF6'; ctx.fillRect(0,0,A4W,A4H);
+    const ratio=Math.min(A4W/canvas.width, A4H/canvas.height);
+    const dw=Math.round(canvas.width*ratio), dh=Math.round(canvas.height*ratio);
+    ctx.drawImage(canvas, Math.round((A4W-dw)/2), Math.round((A4H-dh)/2), dw, dh);
+    msg.textContent='下載中…';
+    const now=new Date(), ts=now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0');
+    const link=document.createElement('a');
+    link.download='富鼎分會_產業服務鏈_A4直立_'+ts+'.png';
+    link.href=out.toDataURL('image/png',1.0); link.click();
+  } catch(err){
+    alert('❌ 匯出失敗：'+err.message+'\n\n請改用 Chrome 瀏覽器再試。');
+  } finally {
+    poster.classList.remove('pa4-visible');
+    overlay.classList.remove('show');
+    btns.forEach(b=>b.disabled=false);
   }
 }
 
